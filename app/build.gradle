@@ -1,0 +1,42 @@
+apply plugin: 'com.android.application'
+
+android {
+	compileSdkVersion 27
+	defaultConfig {
+		applicationId 'ac.robinson.chameleonnotifier'
+		minSdkVersion 18
+		targetSdkVersion 27
+		versionCode 8
+		versionName '1.2'
+		resConfigs 'en'
+	}
+	buildTypes {
+		release {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+			shrinkResources true
+		}
+	}
+}
+
+dependencies {
+	implementation 'com.android.support:appcompat-v7:27.1.1'
+	implementation 'com.android.support:palette-v7:27.1.1'
+
+	// image processing - OpenCV for colour detection
+	implementation files('libs/opencv-3.1.0.jar')
+	implementation files('libs/opencv_armeabi.jar')
+	implementation files('libs/opencv_armeabi-v7a.jar')
+	implementation files('libs/opencv_armeabi-arm64-v8a.jar')
+
+	// zoomable image view - included directly so we can add colour picker and state bitmap
+	// implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.4.1'
+	implementation "com.android.support:exifinterface:27.1.1"
+
+	// popover dialogs - included directly so we can display fullscreen
+	// implementation 'com.github.michaelye.easydialog:easydialog:1.4'
+
+	// also used, but not importable:
+	// https://github.com/phishman3579/android-motion-detection
+}

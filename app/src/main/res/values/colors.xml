@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="colorPrimary">#689f38</color>
+	<color name="colorPrimaryDark">#33691e</color>
+	<color name="colorAccent">#ffd600</color>
+
+	<color name="default_object_highlight">#000000</color>
+
+	<!-- camera -->
+	<color name="camera_background">#cc000000</color>
+	<color name="camera_text_background">#cc000000</color>
+	<color name="camera_text">#ccffffff</color>
+
+	<!-- for EasyDialog -->
+	<color name="notification_background">#bba9a9a9</color>
+	<color name="notification_text">#ffffff</color>
+</resources>

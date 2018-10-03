@@ -1,0 +1,181 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/fullscreen_content"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	tools:context="ac.robinson.chameleonnotifier.CameraActivity">
+
+	<FrameLayout
+		android:id="@+id/camera_preview"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:keepScreenOn="true"
+		android:onClick="handleClick" />
+
+	<com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+		android:id="@+id/zoomable_image_view"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:keepScreenOn="true"
+		android:visibility="invisible" />
+
+	<ImageView
+		android:id="@+id/image_view"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:contentDescription="@string/hint_chameleon_image"
+		android:keepScreenOn="true"
+		android:scaleType="centerCrop"
+		android:visibility="invisible" />
+
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:layout_alignParentTop="true"
+		android:background="?attr/colorPrimary"
+		android:elevation="@dimen/default_elevation"
+		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+		app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+	<ac.robinson.chameleonnotifier.view.CircleImageButton
+		android:id="@+id/facebook_button"
+		android:layout_width="@dimen/colour_picker_button_size"
+		android:layout_height="@dimen/colour_picker_button_size"
+		android:src="@drawable/ic_face_white_36dp"
+		android:visibility="invisible" />
+	<!-- must be invisible (rather than gone) as we need its dimensions -->
+
+	<ac.robinson.chameleonnotifier.view.CircleImageButton
+		android:id="@+id/sms_button"
+		android:layout_width="@dimen/colour_picker_button_size"
+		android:layout_height="@dimen/colour_picker_button_size"
+		android:src="@drawable/ic_message_white_36dp"
+		android:visibility="invisible" />
+
+	<ac.robinson.chameleonnotifier.view.CircleImageButton
+		android:id="@+id/whatsapp_button"
+		android:layout_width="@dimen/colour_picker_button_size"
+		android:layout_height="@dimen/colour_picker_button_size"
+		android:src="@drawable/ic_opacity_white_36dp"
+		android:visibility="invisible" />
+
+	<LinearLayout
+		android:id="@+id/scan_permissions_request_hint"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:orientation="vertical"
+		android:visibility="gone">
+
+		<TextView
+			android:id="@+id/allow_camera_hint_text"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:gravity="center"
+			android:paddingBottom="@dimen/activity_vertical_margin"
+			android:paddingLeft="@dimen/activity_horizontal_margin"
+			android:paddingRight="@dimen/activity_horizontal_margin"
+			android:paddingTop="@dimen/activity_vertical_margin"
+			android:text="@string/message_camera_permission_reason"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="@color/camera_text" />
+
+		<Button
+			android:id="@+id/request_camera_permission"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="@dimen/activity_vertical_margin"
+			android:onClick="handleClick"
+			android:text="@string/button_ask_me_again" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/scan_permissions_allow_hint"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:orientation="vertical"
+		android:visibility="gone">
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:gravity="center"
+			android:paddingBottom="@dimen/activity_vertical_margin"
+			android:paddingLeft="@dimen/activity_horizontal_margin"
+			android:paddingRight="@dimen/activity_horizontal_margin"
+			android:paddingTop="@dimen/activity_vertical_margin"
+			android:text="@string/message_camera_denied"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="@color/camera_text" />
+
+		<Button
+			android:id="@+id/edit_app_permissions"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="@dimen/activity_vertical_margin"
+			android:onClick="handleClick"
+			android:text="@string/button_edit_app_permissions" />
+	</LinearLayout>
+
+	<ImageButton
+		android:id="@+id/camera_take_photo"
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/control_button_height"
+		android:layout_alignParentBottom="true"
+		android:layout_centerHorizontal="true"
+		android:background="@color/camera_text_background"
+		android:contentDescription="@string/hint_action_photo"
+		android:elevation="@dimen/default_elevation"
+		android:gravity="center"
+		android:onClick="handleClick"
+		android:paddingBottom="@dimen/activity_vertical_margin"
+		android:paddingLeft="@dimen/activity_horizontal_margin"
+		android:paddingRight="@dimen/activity_horizontal_margin"
+		android:paddingTop="@dimen/activity_vertical_margin"
+		android:src="@drawable/ic_camera_white_48dp" />
+
+	<RelativeLayout
+		android:id="@+id/image_customisation_controls"
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/control_button_height"
+		android:layout_alignParentBottom="true"
+		android:background="@color/camera_text_background"
+		android:visibility="gone">
+
+		<ImageButton
+			android:id="@+id/image_enable_colour_picker"
+			android:layout_width="@dimen/control_button_height"
+			android:layout_height="@dimen/control_button_height"
+			android:layout_alignParentEnd="true"
+			android:layout_centerInParent="true"
+			android:background="@null"
+			android:contentDescription="@string/hint_action_toggle_colour_picker"
+			android:elevation="@dimen/default_elevation"
+			android:gravity="center"
+			android:onClick="handleClick"
+			android:src="@drawable/ic_opacity_white_48dp" />
+
+		<SeekBar
+			android:id="@+id/screen_brightness_control"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+			android:layout_toStartOf="@id/image_enable_colour_picker"
+			android:background="@null"
+			android:elevation="@dimen/default_elevation"
+			android:gravity="center"
+			android:paddingBottom="@dimen/activity_vertical_margin"
+			android:paddingLeft="@dimen/activity_horizontal_margin"
+			android:paddingRight="@dimen/activity_horizontal_margin"
+			android:paddingTop="@dimen/activity_vertical_margin" />
+
+	</RelativeLayout>
+
+</RelativeLayout>

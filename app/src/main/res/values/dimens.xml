@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- default Material Design elevation -->
+	<dimen name="default_elevation">4dp</dimen>
+
+	<!-- default screen margins, per the Android Design guidelines. -->
+	<dimen name="activity_horizontal_margin">16dp</dimen>
+	<dimen name="activity_vertical_margin">16dp</dimen>
+
+	<dimen name="notification_horizontal_margin">8dp</dimen>
+	<dimen name="notification_vertical_margin">8dp</dimen>
+
+	<dimen name="control_button_height">92dp</dimen>
+
+	<dimen name="colour_picker_lens_radius">60dp</dimen>
+	<dimen name="colour_picker_lens_outline_width">2dp</dimen>
+	<dimen name="colour_picker_lens_vertical_offset">60dp</dimen>
+	<dimen name="colour_picker_button_size">64dp</dimen>
+
+	<dimen name="notification_popup_vertical_offset">20dp</dimen>
+
+</resources>
