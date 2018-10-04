@@ -1045,7 +1045,9 @@ public class CameraActivity extends SensorMotionActivity {
 							}
 						}
 
-						View dialog = getLayoutInflater().inflate(R.layout.layout_notification, null);
+						// we can't attach to parent as it doesn't exist yet
+						@SuppressLint("InflateParams") View dialog = getLayoutInflater().inflate(R.layout
+								.layout_notification, null);
 						if (dialog != null) {
 							if (mFacebookNotificationCount > 0) {
 								dialog.findViewById(R.id.notification_display_facebook).setVisibility(View.VISIBLE);
@@ -1116,6 +1118,9 @@ public class CameraActivity extends SensorMotionActivity {
 							positionNotificationButtons(mButtonStartPosition);
 							animateNotificationButtons(1, null);
 							break;
+
+						default:
+							break;
 					}
 				}
 				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
@@ -1145,7 +1150,6 @@ public class CameraActivity extends SensorMotionActivity {
 				.ImageAnalyserCallback() {
 			@Override
 			public void analysisFailed() {
-				// Toast.makeText(CameraActivity.this, R.string.image_analysis_error, Toast.LENGTH_SHORT).show();
 				Log.d(TAG, "Image analysis error (or cancelled)");
 			}
 

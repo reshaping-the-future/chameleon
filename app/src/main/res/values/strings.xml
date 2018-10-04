@@ -1,8 +1,6 @@
 <resources>
 	<string name="app_name">Chameleon</string>
 
-	<string name="image_analysis_error">Error: unable to analyse image</string>
-
 	<string name="hint_action_photo">Touch anywhere on the screen to take a photo</string>
 	<string name="hint_action_toggle_colour_picker">Touch here to switch between zooming and colour selection</string>
 	<string name="hint_chameleon_image">Blended-in image</string>
@@ -16,12 +14,6 @@
 	<string name="button_edit_app_permissions">Edit permissions</string>
 	<string name="message_camera_permission_reason">Chameleon needs access to your camera in order to be able to take photos.\n\nIf you don\'t give permission, you won\'t be able to use Chameleon.</string>
 	<string name="button_ask_me_again">Ask me again</string>
-
-	<string name="accessibility_service_description">This service allows Chameleon to read notifications in order to use choose which image highlight to use</string>
-	<string name="hint_accessibility_access">Accessibility service</string>
-	<string name="hint_enable_accessibility_service">Please enable the Chameleon accessibility service.\n\nThis service allows Chameleon to show screen highlights when you receive notifications</string>
-	<string name="hint_edit_accessibility_access">Edit accessibility services</string>
-	<string name="error_accessing_accessibility">Error accessing accessibility settings – please try opening Chameleon again</string>
 
 	<string name="hint_notification_access">Notification access</string>
 	<string name="hint_enable_notification_service">Please allow Chameleon to access notifications.\n\nThis access allows Chameleon to show screen highlights instead of normal notifications</string>

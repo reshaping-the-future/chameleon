@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-	compileSdkVersion 27
+	compileSdkVersion 28
 	defaultConfig {
 		applicationId 'ac.robinson.chameleonnotifier'
 		minSdkVersion 18
-		targetSdkVersion 27
+		targetSdkVersion 28
 		versionCode 8
 		versionName '1.2'
 		resConfigs 'en'
@@ -21,8 +21,8 @@ android {
 }
 
 dependencies {
-	implementation 'com.android.support:appcompat-v7:27.1.1'
-	implementation 'com.android.support:palette-v7:27.1.1'
+	implementation 'com.android.support:appcompat-v7:28.0.0'
+	implementation 'com.android.support:palette-v7:28.0.0'
 
 	// image processing - OpenCV for colour detection
 	implementation files('libs/opencv-3.1.0.jar')
@@ -32,7 +32,7 @@ dependencies {
 
 	// zoomable image view - included directly so we can add colour picker and state bitmap
 	// implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.4.1'
-	implementation "com.android.support:exifinterface:27.1.1"
+	implementation "com.android.support:exifinterface:28.0.0"
 
 	// popover dialogs - included directly so we can display fullscreen
 	// implementation 'com.github.michaelye.easydialog:easydialog:1.4'
