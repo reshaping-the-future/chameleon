@@ -115,8 +115,8 @@ public class CameraActivity extends SensorMotionActivity {
 	private ImageView mHighlightImageView;
 
 	private Bitmap mOriginalImage;
-	private Bitmap[] mNotificationImages = new Bitmap[3]; // 0 = facebook, 1 = sms, 2 = whatsapp
-	private ImageAnalyserTask[] mImageAnalyserTasks = new ImageAnalyserTask[3];
+	private final Bitmap[] mNotificationImages = new Bitmap[3]; // 0 = facebook, 1 = sms, 2 = whatsapp
+	private final ImageAnalyserTask[] mImageAnalyserTasks = new ImageAnalyserTask[3];
 	private int mFacebookColour;
 	private int mSmsColour;
 	private int mWhatsAppColour;
@@ -136,7 +136,7 @@ public class CameraActivity extends SensorMotionActivity {
 
 	private static volatile AtomicBoolean sIsProcessingMotionDetection = new AtomicBoolean(false);
 	private static long sMotionDetectionReferenceTime = 0;
-	private static IMotionDetection sMotionDetector = new RgbMotionDetection();
+	private static final IMotionDetection sMotionDetector = new RgbMotionDetection();
 
 	private static final int BUTTON_ANIMATION_DURATION = 250; // animation (and removal) time for notification buttons
 	private CircleImageButton mFacebookButton;
@@ -144,7 +144,7 @@ public class CameraActivity extends SensorMotionActivity {
 	private CircleImageButton mWhatsAppButton;
 	private AnimatorSet mButtonAnimator;
 	private final Handler mButtonHideHandler = new Handler();
-	private PointF mButtonStartPosition = new PointF();
+	private final PointF mButtonStartPosition = new PointF();
 
 	private static final int IMAGE_ANIMATION_DURATION = 1000; // the length of an image highlight
 	private static final float IMAGE_ANIMATION_SCALE = 1.1f; // applied to duration so it finishes before the next one
@@ -480,7 +480,6 @@ public class CameraActivity extends SensorMotionActivity {
 		mWhatsAppColour = defaultColour;
 
 		mFacebookButton = findViewById(R.id.facebook_button);
-		//noinspection ConstantConditions (for findViewById null warning)
 		mFacebookButton.setColour(mFacebookColour);
 		mFacebookButton.setOnTouchListener(mDelayHideTouchListener);
 		mFacebookButton.setOnClickListener(new View.OnClickListener() {
@@ -490,7 +489,6 @@ public class CameraActivity extends SensorMotionActivity {
 			}
 		});
 		mSmsButton = findViewById(R.id.sms_button);
-		//noinspection ConstantConditions (for findViewById null warning)
 		mSmsButton.setColour(mSmsColour);
 		mSmsButton.setOnTouchListener(mDelayHideTouchListener);
 		mSmsButton.setOnClickListener(new View.OnClickListener() {
@@ -500,7 +498,6 @@ public class CameraActivity extends SensorMotionActivity {
 			}
 		});
 		mWhatsAppButton = findViewById(R.id.whatsapp_button);
-		//noinspection ConstantConditions (for findViewById null warning)
 		mWhatsAppButton.setColour(mWhatsAppColour);
 		mWhatsAppButton.setOnTouchListener(mDelayHideTouchListener);
 		mWhatsAppButton.setOnClickListener(new View.OnClickListener() {
@@ -670,15 +667,16 @@ public class CameraActivity extends SensorMotionActivity {
 					// TODO: can we do anything?
 					Log.d(TAG, "Unable to start colour picker reset animation");
 				}
-				if (mZoomableImageView.isZoomEnabled()) {
+				boolean zoomEnabled = mZoomableImageView.isZoomEnabled();
+				if (zoomEnabled) {
 					mEnableColourPickerButton.setImageResource(R.drawable.ic_opacity_yellow_a700_48dp);
 				} else {
 					mEnableColourPickerButton.setImageResource(R.drawable.ic_opacity_white_48dp);
 					positionNotificationButtons(mButtonStartPosition); // just used to hide the buttons
 					mZoomableImageView.setIsColourPickerTouching(false);
 				}
-				mZoomableImageView.setZoomEnabled(!mZoomableImageView.isZoomEnabled());
-				mZoomableImageView.setPanEnabled(!mZoomableImageView.isPanEnabled());
+				mZoomableImageView.setZoomEnabled(!zoomEnabled);
+				mZoomableImageView.setPanEnabled(!zoomEnabled);
 				if (state != null) {
 					mZoomableImageView.setScaleAndCenter(state.getScale(), state.getCenter());
 				}
@@ -719,7 +717,7 @@ public class CameraActivity extends SensorMotionActivity {
 		}
 	}
 
-	private Camera.PreviewCallback mPreviewFrameCallback = new Camera.PreviewCallback() {
+	private final Camera.PreviewCallback mPreviewFrameCallback = new Camera.PreviewCallback() {
 		@Override
 		public void onPreviewFrame(byte[] imageData, Camera camera) {
 			Camera.Parameters parameters = camera.getParameters();
@@ -731,9 +729,9 @@ public class CameraActivity extends SensorMotionActivity {
 
 	private class SavePreviewFrameTask extends AsyncTask<byte[], Void, Boolean> {
 
-		private File mOutputFile;
-		private Camera.Size mPreviewSize;
-		private int mFormat;
+		private final File mOutputFile;
+		private final Camera.Size mPreviewSize;
+		private final int mFormat;
 
 		SavePreviewFrameTask(File outputFile, Camera.Size size, int format) {
 			mOutputFile = outputFile;
@@ -745,7 +743,7 @@ public class CameraActivity extends SensorMotionActivity {
 		protected Boolean doInBackground(byte[]... params) {
 			byte[] data = params[0];
 			if (data == null) {
-				return false; // can't do anything
+				return Boolean.FALSE; // can't do anything
 			}
 
 			FileOutputStream out = null;
@@ -766,12 +764,14 @@ public class CameraActivity extends SensorMotionActivity {
 						if (bitmap != null) {
 							bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
 						} else {
-							return false;
+							return Boolean.FALSE;
 						}
 						break;
 				}
+			} catch (RuntimeException ignored) {
+				return Boolean.FALSE;
 			} catch (Exception ignored) {
-				return false;
+				return Boolean.FALSE;
 			} finally {
 				if (out != null) {
 					try {
@@ -784,7 +784,7 @@ public class CameraActivity extends SensorMotionActivity {
 				}
 			}
 
-			return true;
+			return Boolean.TRUE;
 		}
 
 		@Override
@@ -834,7 +834,7 @@ public class CameraActivity extends SensorMotionActivity {
 		yuvimg.compressToJpeg(rect, 90, out);
 	}
 
-	private SubsamplingScaleImageView.OnImageEventListener mImageEventListener = new SubsamplingScaleImageView
+	private final SubsamplingScaleImageView.OnImageEventListener mImageEventListener = new SubsamplingScaleImageView
 			.OnImageEventListener() {
 		@Override
 		public void onReady() {
@@ -939,7 +939,7 @@ public class CameraActivity extends SensorMotionActivity {
 		return options;
 	}
 
-	private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
+	private final Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
 		@Override
 		public void onPreviewFrame(byte[] data, Camera camera) {
 			// only analyse motion if we actually have events
@@ -987,7 +987,7 @@ public class CameraActivity extends SensorMotionActivity {
 		mPreviewFrame.removeAllViews();
 	}
 
-	private Runnable mAutoFocusRunnable = new Runnable() {
+	private final Runnable mAutoFocusRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (mIsPreviewing) {
@@ -1000,8 +1000,8 @@ public class CameraActivity extends SensorMotionActivity {
 	};
 
 	// simulate continuous auto-focus
-	private Handler mAutoFocusHandler = new Handler();
-	private AutoFocusCallback mAutoFocusCallback = new AutoFocusCallback() {
+	private final Handler mAutoFocusHandler = new Handler();
+	private final AutoFocusCallback mAutoFocusCallback = new AutoFocusCallback() {
 		@Override
 		public void onAutoFocus(boolean success, Camera camera) {
 			mAutoFocusHandler.removeCallbacks(mAutoFocusRunnable);
@@ -1030,7 +1030,7 @@ public class CameraActivity extends SensorMotionActivity {
 		return returnColours;
 	}
 
-	private View.OnTouchListener mColourPickerTouchListener = new View.OnTouchListener() {
+	private final View.OnTouchListener mColourPickerTouchListener = new View.OnTouchListener() {
 		@Override
 		public boolean onTouch(View view, MotionEvent motionEvent) {
 			if (mFacebookNotificationCount > 0 || mSMSNotificationCount > 0 || mWhatsAppNotificationCount > 0) {
@@ -1103,6 +1103,7 @@ public class CameraActivity extends SensorMotionActivity {
 						break;
 				}
 				hideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+				return true;
 
 			} else {
 				if (!mZoomableImageView.isZoomEnabled()) { // only show colour picker when in the right mode
@@ -1124,8 +1125,8 @@ public class CameraActivity extends SensorMotionActivity {
 					}
 				}
 				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
+				return false;
 			}
-			return false;
 		}
 	};
 
@@ -1284,7 +1285,7 @@ public class CameraActivity extends SensorMotionActivity {
 		mButtonAnimator.start();
 	}
 
-	private Runnable mButtonHideRunnable = new Runnable() {
+	private final Runnable mButtonHideRunnable = new Runnable() {
 		@Override
 		public void run() {
 			mFacebookButton.setVisibility(View.INVISIBLE);
@@ -1367,7 +1368,7 @@ public class CameraActivity extends SensorMotionActivity {
 		}
 	};
 
-	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
@@ -1459,9 +1460,9 @@ public class CameraActivity extends SensorMotionActivity {
 
 	private class DetectionTask extends AsyncTask<Void, Void, Boolean> {
 
-		private byte[] mData;
-		private int mWidth;
-		private int mHeight;
+		private final byte[] mData;
+		private final int mWidth;
+		private final int mHeight;
 
 		DetectionTask(byte[] data, int width, int height) {
 			this.mData = data;
@@ -1472,7 +1473,7 @@ public class CameraActivity extends SensorMotionActivity {
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			if (!sIsProcessingMotionDetection.compareAndSet(false, true)) {
-				return false;
+				return Boolean.FALSE;
 			}
 			try {
 				// avoid analysing frames multiple times - 2.5 second delay between motion events
@@ -1482,22 +1483,21 @@ public class CameraActivity extends SensorMotionActivity {
 					long now = System.currentTimeMillis();
 					if (now > (sMotionDetectionReferenceTime + 2500)) {
 						sMotionDetectionReferenceTime = now;
-						return true;
+						return Boolean.TRUE;
 					}
 				}
 			} catch (Exception ignored) {
-				//e.printStackTrace();
 			} finally {
 				sIsProcessingMotionDetection.set(false);
 			}
-			return false;
+			return Boolean.FALSE;
 		}
 
 		@Override
 		protected void onPostExecute(Boolean motionDetected) {
 			if (motionDetected) {
 				// Log.d(TAG, "Camera motion detected");
-				// TODO: handle concurrent notifications better - this is hacky
+				// TODO: handle concurrent notifications better - this is a hacky way to stop them overlapping
 				if (mFacebookNotificationCount > 0) {
 					showNotification(0);
 				}
