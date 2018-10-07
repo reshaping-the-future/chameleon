@@ -11,5 +11,5 @@ Chameleon is a notification management system that aims to help your phone blend
 
 See the [toolkit website](http://digitalinclusiontoolkit.org/) and [research project website](http://www.reshapingthefuture.org/) for more details and related work.
 
-### License
+## License
 Apache 2.0
