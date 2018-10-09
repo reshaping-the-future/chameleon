@@ -1164,7 +1164,6 @@ public class SubsamplingScaleImageView extends View {
 			}
 			mCorrectedTouchPosition.set(xPosition, yPosition);
 			canvas.drawCircle(xPosition, yPosition, mLensRadius, mColourPaint);
-			Log.d(TAG, "drawing at " + xPosition + "," + yPosition);
 			canvas.drawCircle(xPosition, yPosition, mLensRadius + (mLensOutlineWidth / 2), mOutlinePaint);
 			canvas.restore();
 		}

@@ -89,6 +89,7 @@ public class CameraActivity extends SensorMotionActivity {
 
 	private static final String TAG = "CameraActivity";
 
+	private static final int MINIMUM_NOTIFICATION_INTERVAL_MILLIS = 250; // at least this long between notifications
 	private static final int AUTO_HIDE_DELAY_MILLIS = 3000; // how long to wait before hiding UI elements
 	private final Handler mHideHandler = new Handler();
 
@@ -123,6 +124,7 @@ public class CameraActivity extends SensorMotionActivity {
 	private int mFacebookNotificationCount = 0;
 	private int mSMSNotificationCount = 0;
 	private int mWhatsAppNotificationCount = 0;
+	private long mLastNotificationTime = 0;
 	private String mFacebookNotificationTitle;
 	private String mFacebookNotificationMessage;
 	private PendingIntent mFacebookPendingIntent;
@@ -182,6 +184,7 @@ public class CameraActivity extends SensorMotionActivity {
 
 		mImageCacheFile = new File(getCacheDir(), "photo.jpg");
 		mContentView = findViewById(R.id.fullscreen_content);
+		hideSystemUI();
 
 		mPreviewFrame = findViewById(R.id.camera_preview);
 		mZoomableImageView = findViewById(R.id.zoomable_image_view);
@@ -255,9 +258,9 @@ public class CameraActivity extends SensorMotionActivity {
 				if (mFacebookNotificationCount > 0 || mSMSNotificationCount > 0 || mWhatsAppNotificationCount > 0) {
 					// if we've shown notifications, don't allow moving again (for simplicity of interface)
 					// TODO: improve
-					hideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+					hideImageControls(AUTO_HIDE_DELAY_MILLIS);
 				} else {
-					showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+					showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS);
 				}
 				break;
 		}
@@ -514,20 +517,16 @@ public class CameraActivity extends SensorMotionActivity {
 		button.setColour(newColour);
 		animateNotificationButtons(-1, button);
 		mZoomableImageView.setIsColourPickerTouching(false);
-		showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+		showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS);
 		return newColour;
 	}
 
-	private void showAndHideSystemUI(int delayMilliseconds) {
-		showSystemUI();
-		hideSystemUI(delayMilliseconds);
+	private void showAndHideImageControls(int delayMilliseconds) {
+		showImageControls();
+		hideImageControls(delayMilliseconds);
 	}
 
-	private void hideSystemUI(int delayMilliseconds) {
-		// hide system UI - remove the status and navigation bar
-		//if (delayMilliseconds > 0) {
-		//	showSystemUI();
-		//}
+	private void hideImageControls(int delayMilliseconds) {
 		mHideHandler.removeCallbacks(mHideRunnable);
 		mHideHandler.postDelayed(mHideRunnable, delayMilliseconds);
 	}
@@ -535,14 +534,8 @@ public class CameraActivity extends SensorMotionActivity {
 	private final Runnable mHideRunnable = new Runnable() {
 		@Override
 		public void run() {
-			// delayed removal of status and navigation bar
-			mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN |
-					View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-					View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-				mContentView.setSystemUiVisibility(
-						mContentView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-			}
+			// delayed removal of image controls
+			hideSystemUI();
 			if (mZoomableImageView.getIsColourPickerTouching()) { // also hide colour buttons
 				positionNotificationButtons(mButtonStartPosition);
 				mZoomableImageView.setIsColourPickerTouching(false);
@@ -557,8 +550,12 @@ public class CameraActivity extends SensorMotionActivity {
 		}
 	};
 
-	private void showSystemUI() {
+	private void showImageControls() {
+		hideSystemUI();
 		mImageCustomisationControls.setVisibility(View.VISIBLE);
+	}
+
+	private void hideSystemUI() {
 		mContentView.setSystemUiVisibility(
 				View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
 						View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -642,15 +639,15 @@ public class CameraActivity extends SensorMotionActivity {
 			case R.id.camera_preview:
 				if (mCamera != null && mCurrentMode == Mode.CAMERA) {
 					mCurrentMode = Mode.EVENTS;
-					mCamera.setOneShotPreviewCallback(mPreviewFrameCallback);
-					mIsPreviewing = false;
-
-					// mZoomableImageView.setImage(ImageSource.resource(android.R.color.white));
 					ActionBar actionBar = getSupportActionBar();
 					if (actionBar != null) {
 						actionBar.hide();
 					}
 					mTakePhotoButton.setVisibility(View.GONE);
+					// TODO: the change of view size when we hide the action bar sometimes causes initial and modified
+					// TODO: images to be different dimensions
+					mCamera.takePicture(null, null, mPhotoCallback);
+					mIsPreviewing = false;
 				}
 				break;
 
@@ -717,23 +714,23 @@ public class CameraActivity extends SensorMotionActivity {
 		}
 	}
 
-	private final Camera.PreviewCallback mPreviewFrameCallback = new Camera.PreviewCallback() {
+	private final Camera.PictureCallback mPhotoCallback = new Camera.PictureCallback() {
 		@Override
-		public void onPreviewFrame(byte[] imageData, Camera camera) {
+		public void onPictureTaken(byte[] data, Camera camera) {
 			Camera.Parameters parameters = camera.getParameters();
-			Camera.Size size = parameters.getPreviewSize();
-			int format = parameters.getPreviewFormat();
-			new SavePreviewFrameTask(mImageCacheFile, size, format).execute(imageData);
+			Camera.Size size = parameters.getPictureSize();
+			int format = parameters.getPictureFormat();
+			new SavePhotoTask(mImageCacheFile, size, format).execute(data);
 		}
 	};
 
-	private class SavePreviewFrameTask extends AsyncTask<byte[], Void, Boolean> {
+	private class SavePhotoTask extends AsyncTask<byte[], Void, Boolean> {
 
 		private final File mOutputFile;
 		private final Camera.Size mPreviewSize;
 		private final int mFormat;
 
-		SavePreviewFrameTask(File outputFile, Camera.Size size, int format) {
+		SavePhotoTask(File outputFile, Camera.Size size, int format) {
 			mOutputFile = outputFile;
 			mPreviewSize = size;
 			mFormat = format;
@@ -791,6 +788,7 @@ public class CameraActivity extends SensorMotionActivity {
 		protected void onPostExecute(Boolean result) {
 			if (result) {
 				// try to correct for rotated images
+				// TODO: hacky!
 				Point screenSize = new Point();
 				getWindowManager().getDefaultDisplay().getSize(screenSize);
 				float screenAspectRatio = (float) screenSize.x / (float) screenSize.y;
@@ -842,7 +840,7 @@ public class CameraActivity extends SensorMotionActivity {
 
 		@Override
 		public void onImageLoaded() {
-			mZoomableImageView.animateScale(5.5f)
+			mZoomableImageView.animateScale(2f)
 					.withDuration(1500)
 					.withEasing(SubsamplingScaleImageView.EASE_IN_OUT_QUAD)
 					.withInterruptible(true)
@@ -916,7 +914,7 @@ public class CameraActivity extends SensorMotionActivity {
 				setupNotificationBitmap(mWhatsAppColour, 2);
 				mWhatsAppButton.setColour(mWhatsAppColour);
 
-				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+				showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS);
 			}
 		});
 	}
@@ -1102,7 +1100,7 @@ public class CameraActivity extends SensorMotionActivity {
 					default:
 						break;
 				}
-				hideSystemUI(AUTO_HIDE_DELAY_MILLIS);
+				hideImageControls(AUTO_HIDE_DELAY_MILLIS);
 				return true;
 
 			} else {
@@ -1124,7 +1122,7 @@ public class CameraActivity extends SensorMotionActivity {
 							break;
 					}
 				}
-				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
+				showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
 				return false;
 			}
 		}
@@ -1134,7 +1132,7 @@ public class CameraActivity extends SensorMotionActivity {
 		@Override
 		public boolean onTouch(View view, MotionEvent motionEvent) {
 			if (mFacebookNotificationCount <= 0 && mSMSNotificationCount <= 0 && mWhatsAppNotificationCount <= 0) {
-				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS); // only when no notifications have been received
+				showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS); // only when no notifications have been received
 			}
 			return false;
 		}
@@ -1158,6 +1156,25 @@ public class CameraActivity extends SensorMotionActivity {
 			public void analysisSucceeded(Bitmap result) {
 				Log.d(TAG, "Image processing completed for type " + bitmapIndex);
 				mNotificationImages[bitmapIndex] = result;
+				switch (bitmapIndex) {
+					// TODO: having to do this highlights how inflexible the current design is - better to let the user
+					// TODO: select apps by package name and abstract away any notion of which app is notifying
+					case 0:
+						if (mFacebookNotificationCount > 0) {
+							showNotification(bitmapIndex);
+						}
+						break;
+					case 1:
+						if (mSMSNotificationCount > 0) {
+							showNotification(bitmapIndex);
+						}
+						break;
+					case 2:
+						if (mWhatsAppNotificationCount > 0) {
+							showNotification(bitmapIndex);
+						}
+						break;
+				}
 			}
 		});
 
@@ -1251,7 +1268,7 @@ public class CameraActivity extends SensorMotionActivity {
 						.ofFloat(mWhatsAppButton, "translationY", 0, rightY), ObjectAnimator.ofFloat(mFacebookButton,
 								"translationY", 0, buttonOffset));
 				mButtonAnimator.setInterpolator(new OvershootInterpolator());
-				showAndHideSystemUI(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
+				showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
 				break;
 
 			case -1: // in
@@ -1311,7 +1328,7 @@ public class CameraActivity extends SensorMotionActivity {
 			}
 		}
 
-		hideSystemUI(0);
+		hideImageControls(0);
 
 		if (mNotificationImages[id] != null) {
 			Log.d(TAG, "Showing notification for type " + id);
@@ -1335,7 +1352,6 @@ public class CameraActivity extends SensorMotionActivity {
 	private final Runnable mAnimateImageTransitionOffRunnable = new Runnable() {
 		@Override
 		public void run() {
-			Log.d("blah", "animating off");
 			mTransitionDrawable.reverseTransition(IMAGE_ANIMATION_DURATION);
 
 			mToggleImageHighlightHandler.removeCallbacks(mAnimateImageTransitionOnRunnable);
@@ -1375,6 +1391,12 @@ public class CameraActivity extends SensorMotionActivity {
 			if (action == null) {
 				return;
 			}
+
+			long currentTime = System.currentTimeMillis();
+			if (currentTime - mLastNotificationTime < MINIMUM_NOTIFICATION_INTERVAL_MILLIS) {
+				return; // avoid interrupting notifications if they arrive concurrently
+			}
+			mLastNotificationTime = currentTime;
 
 			Bundle extras = intent.getExtras();
 			String notificationTitle = null;
