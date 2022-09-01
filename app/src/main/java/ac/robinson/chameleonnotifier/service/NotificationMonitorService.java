@@ -45,8 +45,7 @@ public class NotificationMonitorService extends NotificationListenerService {
 
 		// note: one improvement here could be to track last notification times to avoid multiple notification events
 		boolean shouldCancelNotification = sMonitorManager.handleNotificationEvent(NotificationMonitorService.this,
-				notification
-				.getPackageName(), extras, intent);
+				notification.getPackageName(), extras, intent);
 
 		// cancel this notification - note that on recent SDK versions the notification can sometimes briefly show,
 		// but then disappears instantly - overall, this is better than using cancelAllNotifications();
@@ -68,8 +67,7 @@ public class NotificationMonitorService extends NotificationListenerService {
 		// check the list of system notification listeners to see whether ours has been enabled
 		String notificationListeners;
 		try {
-			notificationListeners = Settings.Secure.getString(context.getContentResolver(),
-					"enabled_notification_listeners");
+			notificationListeners = Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
 		} catch (Throwable t) {
 			return false; // can't read the value - no point continuing
 		}
@@ -80,8 +78,7 @@ public class NotificationMonitorService extends NotificationListenerService {
 			for (String name : listenerNames) {
 				final ComponentName componentName = ComponentName.unflattenFromString(name);
 				if (componentName != null) {
-					if (packageName.equals(componentName.getPackageName()) &&
-							className.equals(componentName.getClassName())) {
+					if (packageName.equals(componentName.getPackageName()) && className.equals(componentName.getClassName())) {
 						return true;
 					}
 				}

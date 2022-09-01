@@ -21,10 +21,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 
-public class CircleImageButton extends android.support.v7.widget.AppCompatImageView {
+import androidx.annotation.NonNull;
+
+public class CircleImageButton extends androidx.appcompat.widget.AppCompatImageView {
 
 	private int mCentreY;
 	private int mCentreX;

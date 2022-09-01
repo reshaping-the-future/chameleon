@@ -36,14 +36,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,6 +63,7 @@ import org.opencv.android.OpenCVLoader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -78,6 +71,14 @@ import ac.robinson.chameleonnotifier.service.MonitorManager;
 import ac.robinson.chameleonnotifier.service.NotificationMonitorService;
 import ac.robinson.chameleonnotifier.view.CameraSurfaceView;
 import ac.robinson.chameleonnotifier.view.CircleImageButton;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.palette.graphics.Palette;
 
 public class CameraActivity extends SensorMotionActivity {
 
@@ -136,7 +137,7 @@ public class CameraActivity extends SensorMotionActivity {
 	private PendingIntent mWhatsAppPendingIntent;
 	private EasyDialog mCurrentNotificationDialog;
 
-	private static volatile AtomicBoolean sIsProcessingMotionDetection = new AtomicBoolean(false);
+	private static final AtomicBoolean sIsProcessingMotionDetection = new AtomicBoolean(false);
 	private static long sMotionDetectionReferenceTime = 0;
 	private static final IMotionDetection sMotionDetector = new RgbMotionDetection();
 
@@ -208,8 +209,8 @@ public class CameraActivity extends SensorMotionActivity {
 		// check camera permissions (see onResume for full method)
 		if (savedInstanceState != null) {
 			mHasRequestedCameraPermission = savedInstanceState.getBoolean("mHasRequestedCameraPermission", false);
-			mInitialBrightnessMode = savedInstanceState.getInt("mInitialBrightnessMode", Settings.System
-					.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+			mInitialBrightnessMode = savedInstanceState.getInt("mInitialBrightnessMode",
+					Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 			mInitialBrightnessLevel = savedInstanceState.getInt("mInitialBrightnessLevel", 255);
 		}
 
@@ -289,8 +290,7 @@ public class CameraActivity extends SensorMotionActivity {
 		mAdjustBrightnessBar.setMax(initialBrightnessLevel);
 
 		try {
-			initialBrightnessMode = Settings.System.getInt(getContentResolver(), Settings.System
-					.SCREEN_BRIGHTNESS_MODE);
+			initialBrightnessMode = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
 		} catch (Settings.SettingNotFoundException ignored) {
 		}
 		try {
@@ -318,8 +318,7 @@ public class CameraActivity extends SensorMotionActivity {
 									mAdjustBrightnessBar.setEnabled(true);
 								}
 							})
-							.setPositiveButton(R.string.hint_edit_settings_access, new DialogInterface.OnClickListener
-									() {
+							.setPositiveButton(R.string.hint_edit_settings_access, new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									try {
@@ -327,8 +326,7 @@ public class CameraActivity extends SensorMotionActivity {
 										intent.setData(Uri.parse("package:ac.robinson.chameleonnotifier"));
 										startActivity(intent);
 									} catch (ActivityNotFoundException e) {
-										Toast.makeText(CameraActivity.this, R.string.error_editing_settings, Toast
-												.LENGTH_LONG)
+										Toast.makeText(CameraActivity.this, R.string.error_editing_settings, Toast.LENGTH_LONG)
 												.show();
 									}
 									dialog.dismiss();
@@ -366,9 +364,7 @@ public class CameraActivity extends SensorMotionActivity {
 					.setOnCancelListener(new DialogInterface.OnCancelListener() {
 						@Override
 						public void onCancel(DialogInterface dialog) {
-							Toast.makeText(CameraActivity.this, R.string.error_accessing_notifications, Toast
-									.LENGTH_LONG)
-									.show();
+							Toast.makeText(CameraActivity.this, R.string.error_accessing_notifications, Toast.LENGTH_LONG).show();
 							finish();
 						}
 					})
@@ -379,8 +375,7 @@ public class CameraActivity extends SensorMotionActivity {
 								// note: can use Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS after API 22
 								startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
 							} catch (ActivityNotFoundException e) {
-								Toast.makeText(CameraActivity.this, R.string.error_accessing_notifications, Toast
-										.LENGTH_LONG)
+								Toast.makeText(CameraActivity.this, R.string.error_accessing_notifications, Toast.LENGTH_LONG)
 										.show();
 								finish();
 							}
@@ -560,8 +555,7 @@ public class CameraActivity extends SensorMotionActivity {
 				View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
 						View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			mContentView.setSystemUiVisibility(
-					mContentView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+			mContentView.setSystemUiVisibility(mContentView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 		}
 	}
 
@@ -585,14 +579,12 @@ public class CameraActivity extends SensorMotionActivity {
 			// being called when we display the permission request box (increase this number to ask more times)
 			if (permissionDenied >= 2) {
 				// show the prompt to edit settings and grant the permission
-				//noinspection ConstantConditions (for findViewById null warning)
 				findViewById(R.id.scan_permissions_allow_hint).setVisibility(View.VISIBLE);
 				mHasRequestedCameraPermission = true;
 				return false;
 
 			} else {
-				if (ActivityCompat.shouldShowRequestPermissionRationale(CameraActivity.this, Manifest.permission
-						.CAMERA)) {
+				if (ActivityCompat.shouldShowRequestPermissionRationale(CameraActivity.this, Manifest.permission.CAMERA)) {
 					// permission denied without ticking "never again" button - show the explanation, and request
 					// permissions when they click the button
 					findViewById(R.id.scan_permissions_request_hint).setVisibility(View.VISIBLE);
@@ -655,9 +647,8 @@ public class CameraActivity extends SensorMotionActivity {
 				ImageViewState state = mZoomableImageView.getState();
 				// TODO: this is simply to cause an event in mImageEventListener if they click this button before
 				// TODO: loading has finished; otherwise, the image can be null and we crash
-				SubsamplingScaleImageView.AnimationBuilder builder = mZoomableImageView.animateCenter
-						(mZoomableImageView
-						.getCenter());
+				SubsamplingScaleImageView.AnimationBuilder builder = mZoomableImageView.animateCenter(
+						mZoomableImageView.getCenter());
 				if (builder != null) {
 					builder.start();
 				} else {
@@ -832,8 +823,8 @@ public class CameraActivity extends SensorMotionActivity {
 		yuvimg.compressToJpeg(rect, 90, out);
 	}
 
-	private final SubsamplingScaleImageView.OnImageEventListener mImageEventListener = new SubsamplingScaleImageView
-			.OnImageEventListener() {
+	private final SubsamplingScaleImageView.OnImageEventListener mImageEventListener =
+			new SubsamplingScaleImageView.OnImageEventListener() {
 		@Override
 		public void onReady() {
 		}
@@ -925,9 +916,7 @@ public class CameraActivity extends SensorMotionActivity {
 				mImageAnalyserTask.cancel(true);
 			}
 		}
-		for (int i = 0; i < mNotificationImages.length; i++) {
-			mNotificationImages[i] = null;
-		}
+		Arrays.fill(mNotificationImages, null);
 	}
 
 	private BitmapFactory.Options getImageDimensions(File image) {
@@ -954,12 +943,11 @@ public class CameraActivity extends SensorMotionActivity {
 		mCamera = CameraUtilities.initialiseCamera(preferFront, cameraConfiguration);
 		if (mCamera != null) {
 			int screenRotation = CameraUtilities.getScreenRotationDegrees(getWindowManager());
-			int displayOrientation = CameraUtilities.getPreviewOrientationDegrees(screenRotation, cameraConfiguration
-					.cameraOrientationDegrees, cameraConfiguration.usingFrontCamera);
-			mPreviewFrame.addView(new CameraSurfaceView(CameraActivity.this, getWindowManager().getDefaultDisplay(),
-					mCamera, displayOrientation, cameraConfiguration.cameraOrientationDegrees, mAutoFocusCallback,
-					cameraConfiguration.usingFrontCamera ? mPreviewCallback : null, cameraConfiguration
-					.usingFrontCamera));
+			int displayOrientation = CameraUtilities.getPreviewOrientationDegrees(screenRotation,
+					cameraConfiguration.cameraOrientationDegrees, cameraConfiguration.usingFrontCamera);
+			mPreviewFrame.addView(new CameraSurfaceView(CameraActivity.this, getWindowManager().getDefaultDisplay(), mCamera,
+					displayOrientation, cameraConfiguration.cameraOrientationDegrees, mAutoFocusCallback,
+					cameraConfiguration.usingFrontCamera ? mPreviewCallback : null, cameraConfiguration.usingFrontCamera));
 			mIsUsingFrontCamera = cameraConfiguration.usingFrontCamera; // TODO: could end up motion detecting rear cam
 			mIsPreviewing = true;
 		}
@@ -1044,40 +1032,39 @@ public class CameraActivity extends SensorMotionActivity {
 						}
 
 						// we can't attach to parent as it doesn't exist yet
-						@SuppressLint("InflateParams") View dialog = getLayoutInflater().inflate(R.layout
-								.layout_notification, null);
+						@SuppressLint("InflateParams") View dialog = getLayoutInflater().inflate(R.layout.layout_notification,
+								null);
 						if (dialog != null) {
 							if (mFacebookNotificationCount > 0) {
 								dialog.findViewById(R.id.notification_display_facebook).setVisibility(View.VISIBLE);
 								if (mFacebookNotificationTitle != null) {
-									((TextView) dialog.findViewById(R.id.notification_title_facebook)).setText
-											(mFacebookNotificationTitle);
+									((TextView) dialog.findViewById(R.id.notification_title_facebook)).setText(
+											mFacebookNotificationTitle);
 								}
 								if (mFacebookNotificationMessage != null) {
-									((TextView) dialog.findViewById(R.id.notification_message_facebook)).setText
-											(mFacebookNotificationMessage);
+									((TextView) dialog.findViewById(R.id.notification_message_facebook)).setText(
+											mFacebookNotificationMessage);
 								}
 							}
 							if (mSMSNotificationCount > 0) {
 								dialog.findViewById(R.id.notification_display_sms).setVisibility(View.VISIBLE);
 								if (mSMSNotificationTitle != null) {
-									((TextView) dialog.findViewById(R.id.notification_title_sms)).setText
-											(mSMSNotificationTitle);
+									((TextView) dialog.findViewById(R.id.notification_title_sms)).setText(mSMSNotificationTitle);
 								}
 								if (mSMSNotificationMessage != null) {
-									((TextView) dialog.findViewById(R.id.notification_message_sms)).setText
-											(mSMSNotificationMessage);
+									((TextView) dialog.findViewById(R.id.notification_message_sms)).setText(
+											mSMSNotificationMessage);
 								}
 							}
 							if (mWhatsAppNotificationCount > 0) {
 								dialog.findViewById(R.id.notification_display_whatsapp).setVisibility(View.VISIBLE);
 								if (mWhatsAppNotificationTitle != null) {
-									((TextView) dialog.findViewById(R.id.notification_title_whatsapp)).setText
-											(mWhatsAppNotificationTitle);
+									((TextView) dialog.findViewById(R.id.notification_title_whatsapp)).setText(
+											mWhatsAppNotificationTitle);
 								}
 								if (mWhatsAppNotificationMessage != null) {
-									((TextView) dialog.findViewById(R.id.notification_message_whatsapp)).setText
-											(mWhatsAppNotificationMessage);
+									((TextView) dialog.findViewById(R.id.notification_message_whatsapp)).setText(
+											mWhatsAppNotificationMessage);
 								}
 							}
 
@@ -1085,11 +1072,10 @@ public class CameraActivity extends SensorMotionActivity {
 									.setLocation(new int[]{
 											Math.round(motionEvent.getX()),
 											Math.round(motionEvent.getY() -
-													getResources().getDimension(R.dimen
-															.notification_popup_vertical_offset))
+													getResources().getDimension(R.dimen.notification_popup_vertical_offset))
 									})
-									.setBackgroundColor(CameraActivity.this.getResources()
-											.getColor(R.color.notification_background))
+									.setBackgroundColor(
+											CameraActivity.this.getResources().getColor(R.color.notification_background))
 									.setGravity(EasyDialog.GRAVITY_TOP)
 									.setTouchOutsideDismiss(true)
 									.setMatchParent(false)
@@ -1145,38 +1131,38 @@ public class CameraActivity extends SensorMotionActivity {
 		}
 
 		// get a new bitmap with the specified colour highlighted
-		ImageAnalyserTask parserTask = new ImageAnalyserTask(mOriginalImage, colour, new ImageAnalyserTask
-				.ImageAnalyserCallback() {
-			@Override
-			public void analysisFailed() {
-				Log.d(TAG, "Image analysis error (or cancelled)");
-			}
+		ImageAnalyserTask parserTask = new ImageAnalyserTask(mOriginalImage, colour,
+				new ImageAnalyserTask.ImageAnalyserCallback() {
+					@Override
+					public void analysisFailed() {
+						Log.d(TAG, "Image analysis error (or cancelled)");
+					}
 
-			@Override
-			public void analysisSucceeded(Bitmap result) {
-				Log.d(TAG, "Image processing completed for type " + bitmapIndex);
-				mNotificationImages[bitmapIndex] = result;
-				switch (bitmapIndex) {
-					// TODO: having to do this highlights how inflexible the current design is - better to let the user
-					// TODO: select apps by package name and abstract away any notion of which app is notifying
-					case 0:
-						if (mFacebookNotificationCount > 0) {
-							showNotification(bitmapIndex);
+					@Override
+					public void analysisSucceeded(Bitmap result) {
+						Log.d(TAG, "Image processing completed for type " + bitmapIndex);
+						mNotificationImages[bitmapIndex] = result;
+						switch (bitmapIndex) {
+							// TODO: having to do this highlights how inflexible the current design is - better to let the user
+							// TODO: select apps by package name and abstract away any notion of which app is notifying
+							case 0:
+								if (mFacebookNotificationCount > 0) {
+									showNotification(bitmapIndex);
+								}
+								break;
+							case 1:
+								if (mSMSNotificationCount > 0) {
+									showNotification(bitmapIndex);
+								}
+								break;
+							case 2:
+								if (mWhatsAppNotificationCount > 0) {
+									showNotification(bitmapIndex);
+								}
+								break;
 						}
-						break;
-					case 1:
-						if (mSMSNotificationCount > 0) {
-							showNotification(bitmapIndex);
-						}
-						break;
-					case 2:
-						if (mWhatsAppNotificationCount > 0) {
-							showNotification(bitmapIndex);
-						}
-						break;
-				}
-			}
-		});
+					}
+				});
 
 		if (mImageAnalyserTasks[bitmapIndex] != null) {
 			mImageAnalyserTasks[bitmapIndex].cancel(true);
@@ -1193,8 +1179,7 @@ public class CameraActivity extends SensorMotionActivity {
 
 		// position the control buttons in anticipation of touch completion
 		RelativeLayout.LayoutParams controlLayoutParams = getLayoutParamsForButtonPosition(centrePoint,
-				mFacebookButton.getWidth(), mFacebookButton
-				.getHeight(), parentLeft, parentTop, parentRight, parentBottom);
+				mFacebookButton.getWidth(), mFacebookButton.getHeight(), parentLeft, parentTop, parentRight, parentBottom);
 		mFacebookButton.setLayoutParams(controlLayoutParams);
 		mSmsButton.setLayoutParams(controlLayoutParams);
 		mWhatsAppButton.setLayoutParams(controlLayoutParams);
@@ -1204,8 +1189,10 @@ public class CameraActivity extends SensorMotionActivity {
 		mWhatsAppButton.setVisibility(View.INVISIBLE);
 	}
 
-	private RelativeLayout.LayoutParams getLayoutParamsForButtonPosition(PointF buttonPosition, int buttonWidth, int
-			buttonHeight, int parentLeft, int parentTop, int parentRight, int parentBottom) {
+	private RelativeLayout.LayoutParams getLayoutParamsForButtonPosition(PointF buttonPosition, int buttonWidth,
+																		 int buttonHeight,
+																		 int parentLeft, int parentTop, int parentRight,
+																		 int parentBottom) {
 		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(buttonWidth, buttonHeight);
 		layoutParams.leftMargin = parentLeft + Math.round(buttonPosition.x - (buttonWidth / 2f));
 		layoutParams.topMargin = parentTop + Math.round(buttonPosition.y - (buttonHeight / 2f));
@@ -1262,11 +1249,10 @@ public class CameraActivity extends SensorMotionActivity {
 				}
 
 				mButtonAnimator.playTogether(ObjectAnimator.ofFloat(mSmsButton, "translationX", 0, leftX),
-						ObjectAnimator
-						.ofFloat(mSmsButton, "translationY", 0, leftY), ObjectAnimator.ofFloat(mWhatsAppButton,
-								"translationX", 0, rightX), ObjectAnimator
-						.ofFloat(mWhatsAppButton, "translationY", 0, rightY), ObjectAnimator.ofFloat(mFacebookButton,
-								"translationY", 0, buttonOffset));
+						ObjectAnimator.ofFloat(mSmsButton, "translationY", 0, leftY),
+						ObjectAnimator.ofFloat(mWhatsAppButton, "translationX", 0, rightX),
+						ObjectAnimator.ofFloat(mWhatsAppButton, "translationY", 0, rightY),
+						ObjectAnimator.ofFloat(mFacebookButton, "translationY", 0, buttonOffset));
 				mButtonAnimator.setInterpolator(new OvershootInterpolator());
 				showAndHideImageControls(AUTO_HIDE_DELAY_MILLIS); // hide buttons again if no interaction happens
 				break;
@@ -1284,11 +1270,10 @@ public class CameraActivity extends SensorMotionActivity {
 				}
 
 				mButtonAnimator.playTogether(ObjectAnimator.ofFloat(mSmsButton, "translationX", leftX, 0),
-						ObjectAnimator
-						.ofFloat(mSmsButton, "translationY", leftY, 0), ObjectAnimator.ofFloat(mWhatsAppButton,
-								"translationX", rightX, 0), ObjectAnimator
-						.ofFloat(mWhatsAppButton, "translationY", rightY, 0), ObjectAnimator.ofFloat(mFacebookButton,
-								"translationY", buttonOffset, 0));
+						ObjectAnimator.ofFloat(mSmsButton, "translationY", leftY, 0),
+						ObjectAnimator.ofFloat(mWhatsAppButton, "translationX", rightX, 0),
+						ObjectAnimator.ofFloat(mWhatsAppButton, "translationY", rightY, 0),
+						ObjectAnimator.ofFloat(mFacebookButton, "translationY", buttonOffset, 0));
 				mButtonAnimator.setInterpolator(new AnticipateInterpolator());
 
 				// show briefly in final position, then hide
@@ -1334,8 +1319,7 @@ public class CameraActivity extends SensorMotionActivity {
 			Log.d(TAG, "Showing notification for type " + id);
 			Resources resources = getResources();
 			mTransitionDrawable = new TransitionDrawable(new Drawable[]{
-					new BitmapDrawable(resources, mOriginalImage),
-					new BitmapDrawable(resources, mNotificationImages[id])
+					new BitmapDrawable(resources, mOriginalImage), new BitmapDrawable(resources, mNotificationImages[id])
 			});
 			mHighlightImageView.setVisibility(View.VISIBLE);
 			mHighlightImageView.setImageDrawable(mTransitionDrawable);
@@ -1344,8 +1328,8 @@ public class CameraActivity extends SensorMotionActivity {
 			mToggleImageHighlightHandler.removeCallbacks(mAnimateImageTransitionOnRunnable);
 			mToggleImageHighlightHandler.removeCallbacks(mAnimateImageTransitionOffRunnable);
 			mToggleImageHighlightHandler.removeCallbacks(mResetImageTransitionRunnable);
-			mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOffRunnable, Math.round(
-					IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
+			mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOffRunnable,
+					Math.round(IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
 		}
 	}
 
@@ -1357,15 +1341,15 @@ public class CameraActivity extends SensorMotionActivity {
 			mToggleImageHighlightHandler.removeCallbacks(mAnimateImageTransitionOnRunnable);
 			mToggleImageHighlightHandler.removeCallbacks(mAnimateImageTransitionOffRunnable);
 			if (mTransitionRepeatCount < EVENT_REPEAT_COUNT) { // TODO: improve; extract to preferences
-				mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOnRunnable, Math.round(
-						IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
-				mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOffRunnable, Math.round(
-						2 * (IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE)));
+				mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOnRunnable,
+						Math.round(IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
+				mToggleImageHighlightHandler.postDelayed(mAnimateImageTransitionOffRunnable,
+						Math.round(2 * (IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE)));
 				mTransitionRepeatCount += 1;
 			} else {
 				mTransitionRepeatCount = 0;
-				mToggleImageHighlightHandler.postDelayed(mResetImageTransitionRunnable, Math.round(
-						IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
+				mToggleImageHighlightHandler.postDelayed(mResetImageTransitionRunnable,
+						Math.round(IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
 			}
 		}
 	};
@@ -1449,8 +1433,7 @@ public class CameraActivity extends SensorMotionActivity {
 	};
 
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[]
-			grantResults) {
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		switch (requestCode) {
 			case CAMERA_PERMISSION_RESULT:
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -1500,7 +1483,7 @@ public class CameraActivity extends SensorMotionActivity {
 			try {
 				// avoid analysing frames multiple times - 2.5 second delay between motion events
 				int[] img = ImageProcessing.decodeYUV420SPtoRGB(mData, mWidth, mHeight);
-				if (img != null && sMotionDetector.detect(img, mWidth, mHeight)) {
+				if (sMotionDetector.detect(img, mWidth, mHeight)) {
 					// TODO: improve (to save battery)
 					long now = System.currentTimeMillis();
 					if (now > (sMotionDetectionReferenceTime + 2500)) {
@@ -1542,7 +1525,7 @@ public class CameraActivity extends SensorMotionActivity {
 							public void run() {
 								showNotification(2);
 							}
-						}, 2 * Math.round(IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
+						}, 2L * Math.round(IMAGE_ANIMATION_DURATION * IMAGE_ANIMATION_SCALE));
 					} else if (mFacebookNotificationCount > 0 || mSMSNotificationCount > 0) {
 						new Handler().postDelayed(new Runnable() {
 							@Override

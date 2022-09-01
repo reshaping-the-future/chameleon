@@ -2,11 +2,12 @@ package ac.robinson.chameleonnotifier;
 
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 class CameraUtilities {
 
@@ -35,13 +36,13 @@ class CameraUtilities {
 
 		@Override
 		public String toString() {
-			return this.getClass().getName() + "[" + hasFrontCamera + "," + numberOfCameras + "," + usingFrontCamera +
-					"," + cameraOrientationDegrees + "]";
+			return this.getClass().getName() + "[" + hasFrontCamera + "," + numberOfCameras + "," + usingFrontCamera + "," +
+					cameraOrientationDegrees + "]";
 		}
 	}
 
 	public static boolean getIsCameraAvailable(PackageManager packageManager) {
-		return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+		return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
 	}
 
 	/**
@@ -57,8 +58,7 @@ class CameraUtilities {
 		cameraConfiguration.reset();
 
 		try {
-			int preferredFacing = (preferFront ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo
-					.CAMERA_FACING_BACK);
+			int preferredFacing = (preferFront ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo.CAMERA_FACING_BACK);
 			int cameraCount = Camera.getNumberOfCameras();
 			for (int i = 0; i < cameraCount; i++) {
 				Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
@@ -105,8 +105,8 @@ class CameraUtilities {
 	}
 
 	// see: http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
-	public static int getPreviewOrientationDegrees(int screenOrientationDegrees, int cameraOrientationDegrees, boolean
-			usingFrontCamera) {
+	public static int getPreviewOrientationDegrees(int screenOrientationDegrees, int cameraOrientationDegrees,
+												   boolean usingFrontCamera) {
 		int previewOrientationDegrees;
 		if (usingFrontCamera) { // compensate for the mirror of the front camera
 			previewOrientationDegrees = (cameraOrientationDegrees + screenOrientationDegrees) % 360;

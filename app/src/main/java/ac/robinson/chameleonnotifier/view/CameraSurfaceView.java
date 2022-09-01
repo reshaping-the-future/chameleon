@@ -174,8 +174,8 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
 		}
 	}
 
-	private Size getBestPreviewSize(List<Size> allSizes, Size defaultSize, int screenWidth, int screenHeight, boolean
-			preferSmallest) {
+	private Size getBestPreviewSize(List<Size> allSizes, Size defaultSize, int screenWidth, int screenHeight,
+									boolean preferSmallest) {
 		if (allSizes == null) {
 			return defaultSize;
 		}

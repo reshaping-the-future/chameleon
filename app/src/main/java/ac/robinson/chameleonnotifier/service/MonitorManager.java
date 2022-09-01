@@ -7,9 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * This class receives notifications from {@link NotificationMonitorService} and decides whether to hide them.
@@ -157,8 +158,7 @@ public class MonitorManager {
 			final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 			if (audioManager != null) {
 				sOriginalVibrationMode = audioManager.getVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION);
-				audioManager.setVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager
-						.VIBRATE_SETTING_OFF);
+				audioManager.setVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager.VIBRATE_SETTING_OFF);
 			}
 		} catch (RuntimeException ignored) {
 		}
